@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getaway Login Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md mx-auto">
+        <div class="mb-6 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">getaway.io</h1>
+            <p class="text-gray-500 text-sm mt-2">Sign in to your leave portal</p>
+        </div>
+
+        <!-- Flashed Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded-lg relative mb-4"
+            role="alert">
+            <strong class="font-bold">{{ category.title() }}:</strong>
+            <span class="block sm:inline">{{ message }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('login') }}" method="post" class="space-y-4" onsubmit="return validateForm()">
+            <div>
+                <label for="user_id" class="text-sm font-medium text-gray-700">User ID</label>
+                <input type="text" id="user_id" name="user_id"
+                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div>
+                <label for="password" class="text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="password" name="password"
+                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <div id="role-selection" class="grid grid-cols-2 gap-2 mt-4">
+                <label for="student"
+                    class="p-4 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200 cursor-pointer">
+                    <input type="radio" id="student" name="role" value="student" class="hidden">
+                    <div class="text-center font-medium">Student</div>
+                </label>
+                <label for="faculty_advisor"
+                    class="p-4 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200 cursor-pointer">
+                    <input type="radio" id="faculty_advisor" name="role" value="faculty_advisor" class="hidden">
+                    <div class="text-center font-medium">Faculty Advisor</div>
+                </label>
+                <label for="hostel_warden"
+                    class="p-4 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200 cursor-pointer">
+                    <input type="radio" id="hostel_warden" name="role" value="hostel_warden" class="hidden">
+                    <div class="text-center font-medium">Hostel Warden</div>
+                </label>
+                <label for="academics"
+                    class="p-4 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200 cursor-pointer">
+                    <input type="radio" id="academics" name="role" value="academics" class="hidden">
+                    <div class="text-center font-medium">Academics</div>
+                </label>
+            </div>
+
+            <button type="submit"
+                class="mt-6 w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-md transition duration-300">
+                Login
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function validateForm() {
+            const role = document.querySelector('input[name="role"]:checked');
+            if (!role) {
+                alert("Please select a role.");
+                return false;
+            }
+            return true;
+        }
+
+        document.querySelectorAll('#role-selection input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                document.querySelectorAll('#role-selection label').forEach(label => {
+                    label.classList.remove('ring-2', 'ring-indigo-500');
+                });
+                if (e.target.checked) {
+                    e.target.closest('label').classList.add('ring-2', 'ring-indigo-500');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md mx-auto text-center space-y-6 md:p-10">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Student Dashboard</h1>
+        <p class="text-gray-500 text-sm">Welcome back!</p>
+
+        <!-- Flashed Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded-lg relative mb-4"
+            role="alert">
+            <strong class="font-bold">{{ category.title() }}:</strong>
+            <span class="block sm:inline">{{ message }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="space-y-4 pt-4">
+            <a href="{{ url_for('create_leave') }}"
+                class="block w-full px-4 py-3 text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-md transition duration-300">
+                Create Leave
+            </a>
+            <a href="{{ url_for('student_view_leaves') }}"
+                class="block w-full px-4 py-3 text-lg font-medium text-white bg-green-600 hover:bg-green-700 rounded-md shadow-md transition duration-300">
+                View Leaves
+            </a>
+            <a href="{{ url_for('logout') }}"
+                class="block w-full px-4 py-3 text-lg font-medium text-white bg-red-500 hover:bg-red-600 rounded-md shadow-md transition duration-300">
+                Logout
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>

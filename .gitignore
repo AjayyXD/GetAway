@@ -4,3 +4,5 @@ pycache/
 venv/
 .venv/
 variables.env
+InsertUsers.py
+passwords.txt

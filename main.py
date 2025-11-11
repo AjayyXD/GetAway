@@ -212,6 +212,12 @@ def login():
                 
                 if role_attempt == 'student':
                     return redirect(url_for('student_dashboard'))
+                elif role_attempt == 'faculty_advisor':
+                    return redirect(url_for('fa_dashboard'))
+                elif role_attempt == 'hostel_warden' :
+                    return redirect(url_for('warden_dashboard'))
+                elif role_attempt == 'academics' :
+                    return redirect(url_for('academics_dashboard'))
                 
         flash('Invalid credentials or role. Please try again.')
         return render_template('login_form.html', error_message="Invalid credentials or role. Please try again.")

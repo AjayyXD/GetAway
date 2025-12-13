@@ -5,6 +5,7 @@ import uuid
 import bcrypt
 import os
 from dotenv import load_dotenv
+import datetime
 
 load_dotenv("variables.env")
 class Database:
@@ -27,13 +28,18 @@ class Database:
             print(f"Error connecting to MariaDB: {e}")
             return None
 
-    def get_user_data(self, user_id):
+    def get_user_data(self, user_id,role):
         connection = self.get_connection()
         if connection is None:
             return None
         cursor = connection.cursor(dictionary=True)
+        id_select = ""
+        if role == 'Student' :
+            id_select = "student_id"
+        else :
+            id_select = "id"
         try:
-            query = "SELECT user_id, password, role FROM users WHERE user_id = %s"
+            query = f"SELECT password_hash FROM {role} WHERE {id_select} = %s"
             cursor.execute(query, (user_id,))
             result = cursor.fetchone()
             return result 
@@ -69,6 +75,12 @@ class Database:
                 "Pending"
             )
             cursor.execute(query, values)
+            updated_id = cursor.lastrowid
+            current_year = datetime.datetime.now().strftime('%y')
+            padded_id = f"{updated_id:06d}"
+            final_id = f"LR{current_year}-{padded_id}"
+            query2 = "UPDATE leaves SET leave_id = %s WHERE id = %s;"
+            cursor.execute(query2,(final_id,updated_id))
             connection.commit()
             return True
         except Error as e:
@@ -85,22 +97,22 @@ class Database:
             return None
         cursor = connection.cursor(dictionary=True)
         try:
-            if role == "student":
+            if role == "Student":
                 query = 'SELECT * FROM leaves WHERE rollno = %s ORDER BY id DESC'
                 cursor.execute(query, (user_id,))
                 leaves = cursor.fetchall()
                 return leaves
-            elif role == "faculty_advisor":
+            elif role == "FA":
                 query = 'SELECT * FROM leaves WHERE fa_status = "Pending" ORDER BY id DESC'
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
-            elif role == "hostel_warden":
+            elif role == "Warden":
                 query = 'SELECT * FROM leaves WHERE warden_status = "Pending" AND fa_status="Approved" ORDER BY id DESC'
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
-            elif role == "academics":
+            elif role == "Admin":
                 query = 'SELECT * FROM leaves WHERE admin_status = "Pending" AND warden_status="Approved" ORDER BY id DESC'
                 cursor.execute(query)
                 leaves = cursor.fetchall()
@@ -195,28 +207,28 @@ def login():
         password_attempt = request.form.get('password')
         role_attempt = request.form.get('role')
 
-        user_data = db.get_user_data(user_id) 
+        user_data = db.get_user_data(user_id,role_attempt) 
 
         if user_data:
-            stored_hash_string = user_data.get('password') 
+            stored_hash_string = user_data.get('password_hash') 
 
             password_attempt_bytes = password_attempt.encode('utf-8')
             
             stored_hash_bytes = stored_hash_string.encode('utf-8')
 
-            if bcrypt.checkpw(password_attempt_bytes, stored_hash_bytes) and user_data['role'] == role_attempt:
+            if bcrypt.checkpw(password_attempt_bytes, stored_hash_bytes) :
                 
 
                 session['user_id'] = user_id
                 session['role'] = role_attempt
                 
-                if role_attempt == 'student':
+                if role_attempt == 'Student':
                     return redirect(url_for('student_dashboard'))
-                elif role_attempt == 'faculty_advisor':
+                elif role_attempt == 'FA':
                     return redirect(url_for('fa_dashboard'))
-                elif role_attempt == 'hostel_warden' :
+                elif role_attempt == 'Warden' :
                     return redirect(url_for('warden_dashboard'))
-                elif role_attempt == 'academics' :
+                elif role_attempt == 'Admin' :
                     return redirect(url_for('academics_dashboard'))
                 
         flash('Invalid credentials or role. Please try again.')
@@ -230,17 +242,18 @@ def login():
 
 @app.route('/student_dashboard')
 def student_dashboard():
-    if 'user_id' not in session or session['role'] != 'student':
+    if 'user_id' not in session or session['role'] != 'Student':
         flash('Unauthorized access.', 'error')
         return redirect(url_for('login'))
     return render_template('student_dashboard.html')
 
 @app.route('/create_leave',methods=['GET','POST'])
 def create_leave():
-    if 'user_id' not in session or session['role'] != 'student':
+    if 'user_id' not in session or session['role'] != 'Student':
         flash('Unauthorized access.', 'error')
         return redirect(url_for('login'))
     if request.method == 'POST':
+
         leave_id_str=str(uuid.uuid4())
         reason=request.form.get('reason')
         Sdate=request.form.get('start_date')
@@ -266,11 +279,11 @@ def create_leave():
         return render_template('createleave.html')
 @app.route('/student_view_leaves')
 def student_view_leaves():
-          if 'user_id' not in session or session['role'] != 'student':
+          if 'user_id' not in session or session['role'] != 'Student':
              flash('Unauthorized access.', 'error')
              return redirect(url_for('login'))
           try:
-             leaves = db.view_leaves("student", session['user_id'])
+             leaves = db.view_leaves("Student", session['user_id'])
              return render_template('student_view_leaves.html', leaves=leaves)
           except Exception as e:
               flash(f"An error occurred: {e}", 'error')
@@ -280,14 +293,14 @@ def student_view_leaves():
 
 @app.route('/fa_dashboard')
 def fa_dashboard():
-    if 'user_id' not in session or session['role'] != 'faculty_advisor':
+    if 'user_id' not in session or session['role'] != 'FA':
         flash('Unauthorized access.','error')
         return redirect(url_for('login'))
     return render_template('fa_dashboard.html')
 
 @app.route('/fa_pending_leaves', methods=['GET', 'POST'])
 def fa_pending_leaves():
-    if 'user_id' not in session or session['role'] != 'faculty_advisor':
+    if 'user_id' not in session or session['role'] != 'FA':
         flash('Unauthorized access.', 'error')
         return redirect(url_for('login'))
     
@@ -300,7 +313,7 @@ def fa_pending_leaves():
         return redirect(url_for('fa_pending_leaves'))
     
     try:
-        leaves = db.view_leaves('faculty_advisor', session['user_id'])
+        leaves = db.view_leaves('FA', session['user_id'])
         return render_template('fa_pending_leaves.html', leaves=leaves)
     except Exception as e:
         flash(f"An error occurred: {e}", 'error')
@@ -308,14 +321,14 @@ def fa_pending_leaves():
     
 @app.route('/warden_dashboard')
 def warden_dashboard():
-    if 'user_id' not in session or session['role'] != 'hostel_warden':
+    if 'user_id' not in session or session['role'] != 'Warden':
         flash('Unauthorized access.','error')
         return redirect(url_for('login'))
     return render_template('warden_dashboard.html')
 
 @app.route('/warden_pending_leaves', methods=['GET', 'POST'])
 def warden_pending_leaves():
-    if 'user_id' not in session or session['role'] != 'hostel_warden':
+    if 'user_id' not in session or session['role'] != 'Warden':
         flash('Unauthorized access.', 'error')
         return redirect(url_for('login'))
     
@@ -328,7 +341,7 @@ def warden_pending_leaves():
         return redirect(url_for('warden_pending_leaves'))
     
     try:
-        leaves = db.view_leaves('hostel_warden', session['user_id'])
+        leaves = db.view_leaves('Warden', session['user_id'])
         return render_template('warden_pending_leaves.html', leaves=leaves)
     except Exception as e:
         flash(f"An error occurred: {e}", 'error')
@@ -336,14 +349,14 @@ def warden_pending_leaves():
 
 @app.route('/academics_dashboard')
 def academics_dashboard():
-    if 'user_id' not in session or session['role'] != 'academics':
+    if 'user_id' not in session or session['role'] != 'Admin':
         flash('Unauthorized access.','error')
         return redirect(url_for('login'))
     return render_template('academics_dashboard.html')
 
 @app.route('/academics_pending_leaves', methods=['GET', 'POST'])
 def academics_pending_leaves():
-    if 'user_id' not in session or session['role'] != 'academics':
+    if 'user_id' not in session or session['role'] != 'Admin':
         flash('Unauthorized access.', 'error')
         return redirect(url_for('login'))
     
@@ -356,7 +369,7 @@ def academics_pending_leaves():
         return redirect(url_for('academics_pending_leaves'))
     
     try:
-        leaves = db.view_leaves('academics', session['user_id'])
+        leaves = db.view_leaves('Admin', session['user_id'])
         return render_template('academics_pending_leaves.html', leaves=leaves)
     except Exception as e:
         flash(f"An error occurred: {e}", 'error')
@@ -364,7 +377,7 @@ def academics_pending_leaves():
     
 @app.route('/academics_approved_leaves',methods=['GET','POST'])
 def academics_approved_leaves():
-     if 'user_id' not in session or session['role'] != 'academics':
+     if 'user_id' not in session or session['role'] != 'Admin':
         flash('Unauthorized access.', 'error')
         return redirect(url_for('login'))
      try:

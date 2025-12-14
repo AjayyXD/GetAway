@@ -36,36 +36,60 @@
         <table class="min-w-full divide-y divide-gray-200 mt-4">
             <thead class="bg-gray-50">
                 <tr>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student
-                        Roll No</th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID
                     </th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Student Roll No</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Student Name</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Reason</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates
                     </th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action
-                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Remarks</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Action</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 {% for leave in leaves %}
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.id }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.leave_id }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.rollno }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.name }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.reason }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.start_date }} to {{
-                        leave.end_date }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <form action="{{ url_for('fa_pending_leaves') }}" method="post">
-                            <input type="hidden" name="leave_id" value="{{ leave.id }}">
-                            <button type="submit" class="text-indigo-600 hover:text-indigo-900">Approve</button>
-                        </form>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.start_date }} to {{ leave.end_date }}
                     </td>
+        
+                    <form action="{{ url_for('fa_pending_leaves') }}" method="post">
+        
+                        <input type="hidden" name="leave_id" value="{{ leave.leave_id }}">
+                        <input type="hidden" name="action_type" value="Approve">
+        
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <input type="text" name="remarks" placeholder="Optional remarks"
+                                class="block w-full border-gray-300 rounded-md shadow-sm sm:text-sm" style="
+                                    /* Ensure it takes full cell width */
+                                    width: 100%; 
+                                    padding: 8px;
+                                    box-sizing: border-box; 
+                                ">
+                        </td>
+        
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button type="submit" class="text-indigo-600 hover:text-indigo-900" style="
+                                    white-space: nowrap;
+                                    padding: 8px 12px;
+                                    border: 1px solid #4f46e5;
+                                    border-radius: 4px;
+                                    /* Ensure button is vertically centered */
+                                    display: inline-block; 
+                                ">
+                                Approve
+                            </button>
+                        </td>
+                    </form>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -39,7 +39,7 @@ class Database:
         else :
             id_select = "id"
         try:
-            query = f"SELECT password_hash FROM {role} WHERE {id_select} = %s"
+            query = f"SELECT name,password_hash FROM {role} WHERE {id_select} = %s"
             cursor.execute(query, (user_id,))
             result = cursor.fetchone()
             return result 
@@ -103,12 +103,15 @@ class Database:
                 leaves = cursor.fetchall()
                 return leaves
             elif role == "FA":
-                query = 'SELECT * FROM leaves WHERE fa_status = "Pending" ORDER BY id DESC'
+                query = f"""SELECT Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time
+                FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE Student.fa_id = '{user_id}' AND leaves.fa_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
             elif role == "Warden":
-                query = 'SELECT * FROM leaves WHERE warden_status = "Pending" AND fa_status="Approved" ORDER BY id DESC'
+                query = f"""SELECT leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time
+                FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE Student.warden_id = '{user_id}' AND leaves.fa_status = 'Approved' 
+                AND leaves.warden_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
@@ -132,14 +135,16 @@ class Database:
                 cursor.close()
             if connection:
                 connection.close()
-    def fa_approve_leave(self,id):
+    def fa_approve_leave(self,id,remarks):
         connection = self.get_connection()
         if connection is None:
             return None
         cursor = connection.cursor(dictionary=True)
         try:
-            query="UPDATE leaves SET fa_status = 'Approved' WHERE id = %s"
+            query="UPDATE leaves SET fa_status = 'Approved' WHERE leave_id = %s"
+            query2=f"UPDATE leaves SET FA_Remarks = '{remarks}' WHERE leave_id = %s;"
             cursor.execute(query,(id,))
+            cursor.execute(query2,(id,))
             connection.commit()
             return True
         except Exception as e:
@@ -156,7 +161,7 @@ class Database:
             return None
         cursor = connection.cursor(dictionary=True)
         try:
-            query="UPDATE leaves SET warden_status = 'Approved' WHERE id = %s"
+            query="UPDATE leaves SET warden_status = 'Approved' WHERE leave_id = %s"
             cursor.execute(query,(id,))
             connection.commit()
             return True
@@ -174,7 +179,7 @@ class Database:
             return None
         cursor = connection.cursor(dictionary=True)
         try:
-            query = "UPDATE leaves SET admin_status = 'Approved' WHERE id = %s"
+            query = "UPDATE leaves SET admin_status = 'Approved' WHERE leave_id = %s"
             cursor.execute(query,(id,))
             connection.commit()
             return True
@@ -221,6 +226,7 @@ def login():
 
                 session['user_id'] = user_id
                 session['role'] = role_attempt
+                session['name'] = user_data.get('name')
                 
                 if role_attempt == 'Student':
                     return redirect(url_for('student_dashboard'))
@@ -306,7 +312,9 @@ def fa_pending_leaves():
     
     if request.method == 'POST':
         leave_id = request.form.get('leave_id')
-        if db.fa_approve_leave(leave_id):
+        remarks = request.form.get('remarks')
+        print(f"remark:{remarks}")
+        if db.fa_approve_leave(leave_id,remarks):
             flash(f"Leave {leave_id} approved successfully.", 'success')
         else:
             flash(f"Failed to approve leave {leave_id}.", 'error')

@@ -109,14 +109,15 @@ class Database:
                 leaves = cursor.fetchall()
                 return leaves
             elif role == "Warden":
-                query = f"""SELECT leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time
+                query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time
                 FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE Student.warden_id = '{user_id}' AND leaves.fa_status = 'Approved' 
                 AND leaves.warden_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
             elif role == "Admin":
-                query = 'SELECT * FROM leaves WHERE admin_status = "Pending" AND warden_status="Approved" ORDER BY id DESC'
+                query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time
+                FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE leaves.warden_status = 'Approved' AND leaves.admin_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
@@ -404,5 +405,5 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0',debug=True)
+#if __name__ == '__main__':
+#    app.run(host='0.0.0.0',debug=True)

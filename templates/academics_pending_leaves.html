@@ -42,10 +42,16 @@
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student
                         Roll No</th>
                     <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student
+                        Name</th>
+                    <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason
                     </th>
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">FA Remark
                     </th>
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action
@@ -55,11 +61,13 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 {% for leave in leaves %}
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.id }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.leave_id }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.rollno }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.name }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.reason }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.start_date }} to {{
                         leave.end_date }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ leave.FA_Remarks }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <form action="{{ url_for('academics_pending_leaves') }}" method="post">
                             <input type="hidden" name="leave_id" value="{{ leave.leave_id }}">

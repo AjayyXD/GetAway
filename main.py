@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for ,flash , session
+from flask import Flask, render_template, request, redirect, url_for ,flash , session , abort
 import mysql.connector
 from mysql.connector import Error
 import uuid
@@ -122,7 +122,8 @@ class Database:
                 leaves = cursor.fetchall()
                 return leaves
             elif role == "academics2":
-                query = 'SELECT * FROM leaves WHERE admin_status = "Approved" ORDER BY id DESC'
+                query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time
+                FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE leaves.admin_status = 'Approved' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
@@ -252,7 +253,7 @@ def student_dashboard():
     if 'user_id' not in session or session['role'] != 'Student':
         flash('Unauthorized access.', 'error')
         return redirect(url_for('login'))
-    return render_template('student_dashboard.html')
+    return render_template('student_dashboard.html',name = session['name'])
 
 @app.route('/create_leave',methods=['GET','POST'])
 def create_leave():
@@ -303,7 +304,7 @@ def fa_dashboard():
     if 'user_id' not in session or session['role'] != 'FA':
         flash('Unauthorized access.','error')
         return redirect(url_for('login'))
-    return render_template('fa_dashboard.html')
+    return render_template('fa_dashboard.html',name = session['name'])
 
 @app.route('/fa_pending_leaves', methods=['GET', 'POST'])
 def fa_pending_leaves():
@@ -333,7 +334,7 @@ def warden_dashboard():
     if 'user_id' not in session or session['role'] != 'Warden':
         flash('Unauthorized access.','error')
         return redirect(url_for('login'))
-    return render_template('warden_dashboard.html')
+    return render_template('warden_dashboard.html',name = session['name'])
 
 @app.route('/warden_pending_leaves', methods=['GET', 'POST'])
 def warden_pending_leaves():
@@ -361,7 +362,7 @@ def academics_dashboard():
     if 'user_id' not in session or session['role'] != 'Admin':
         flash('Unauthorized access.','error')
         return redirect(url_for('login'))
-    return render_template('academics_dashboard.html')
+    return render_template('academics_dashboard.html',name = session['name'])
 
 @app.route('/academics_pending_leaves', methods=['GET', 'POST'])
 def academics_pending_leaves():
@@ -405,5 +406,5 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
-#if __name__ == '__main__':
-#    app.run(host='0.0.0.0',debug=True)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0',debug=True)

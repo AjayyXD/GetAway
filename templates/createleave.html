@@ -15,48 +15,61 @@
     </style>
 </head>
 
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-lg mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 text-center mb-6">Create Leave Application</h1>
-        <form action="{{ url_for('create_leave') }}" method="post" class="space-y-4">
-            <div>
-                <label for="reason" class="text-sm font-medium text-gray-700">Reason for Leave</label>
-                <textarea id="reason" name="reason" rows="4"
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label for="start_date" class="text-sm font-medium text-gray-700">Start Date</label>
-                    <input type="date" id="start_date" name="start_date"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label for="end_date" class="text-sm font-medium text-gray-700">End Date</label>
-                    <input type="date" id="end_date" name="end_date"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label for="out_time" class="text-sm font-medium text-gray-700">Out Time</label>
-                    <input type="time" id="out_time" name="out_time"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label for="in_time" class="text-sm font-medium text-gray-700">In Time</label>
-                    <input type="time" id="in_time" name="in_time"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
-            </div>
-            <button type="submit"
-                class="w-full px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-md transition duration-300">
-                Submit Leave
-            </button>
-        </form>
-        <div class="mt-4 text-center">
-            <a href="{{ url_for('student_dashboard') }}" class="text-blue-600 hover:text-blue-800">Back to Dashboard</a>
+<body class="bg-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-[#1a1a1a] text-white py-6 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-2xl font-semibold">Create Leave Application</h1>
         </div>
-    </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-6 py-12">
+        <form action="{{ url_for('create_leave') }}" method="post" class="space-y-6">
+            <div>
+                <label for="reason" class="block text-sm font-medium text-gray-900 mb-2">Reason for Leave</label>
+                <textarea id="reason" name="reason" rows="4"
+                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="start_date" class="block text-sm font-medium text-gray-900 mb-2">Start Date</label>
+                    <input type="date" id="start_date" name="start_date"
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                </div>
+                <div>
+                    <label for="end_date" class="block text-sm font-medium text-gray-900 mb-2">End Date</label>
+                    <input type="date" id="end_date" name="end_date"
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="out_time" class="block text-sm font-medium text-gray-900 mb-2">Out Time</label>
+                    <input type="time" id="out_time" name="out_time"
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                </div>
+                <div>
+                    <label for="in_time" class="block text-sm font-medium text-gray-900 mb-2">In Time</label>
+                    <input type="time" id="in_time" name="in_time"
+                        class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                <button type="submit"
+                    class="flex-1 px-6 py-3 text-white bg-[#1a1a1a] hover:bg-[#2a2a2a] rounded-lg transition duration-200 font-medium">
+                    Submit Leave
+                </button>
+                <a href="{{ url_for('student_dashboard') }}"
+                    class="flex-1 px-6 py-3 text-center text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition duration-200 font-medium">
+                    Back to Dashboard
+                </a>
+            </div>
+        </form>
+    </main>
 </body>
 
 </html>

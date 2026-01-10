@@ -278,6 +278,11 @@ def create_leave():
             "Edate" : Edate,
             "InTime" : InTime
         }
+        for key,value in leave_data.items():
+            if not value or str(value).strip()=="":
+                flash(f"Error {key} cannot be empty")
+                return redirect(url_for('create_leave'))
+        
         db = Database()
         if(db.insert_leave_request(leave_data)):
            return redirect(url_for('student_view_leaves'))

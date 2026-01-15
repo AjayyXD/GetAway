@@ -22,6 +22,18 @@
             <h1 class="text-2xl font-semibold">Create Leave Application</h1>
         </div>
     </header>
+    <!-- Flashed Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="bg-{{ 'gray' if category == 'success' else 'gray' }}-100 border border-{{ 'gray' if category == 'success' else 'gray' }}-300 text-gray-800 px-4 py-3 rounded-lg relative mb-6"
+        role="alert">
+        <strong class="font-bold">{{ category.title() }}:</strong>
+        <span class="block sm:inline">{{ message }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
 
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-6 py-12">

@@ -61,8 +61,8 @@ class Database:
         cursor = connection.cursor()
         try:
             query = """
-            INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status, address, parent_phone,student_phone)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             values = (
                 leave_data['leave_id'],
@@ -72,7 +72,10 @@ class Database:
                 leave_data['OutTime'],
                 leave_data['Edate'],
                 leave_data['InTime'],
-                "Pending"
+                "Pending",
+                leave_data['address'],
+                leave_data['parent_phone'],
+                leave_data['student_phone']
             )
             cursor.execute(query, values)
             updated_id = cursor.lastrowid
@@ -103,26 +106,26 @@ class Database:
                 leaves = cursor.fetchall()
                 return leaves
             elif role == "FA":
-                query = f"""SELECT Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time
-                FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE Student.fa_id = '{user_id}' AND leaves.fa_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
+                query = f"""SELECT Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time,leaves.student_phone
+                ,leaves.parent_phone,leaves.address FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE Student.fa_id = '{user_id}' AND leaves.fa_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
             elif role == "Warden":
-                query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time
+                query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time,leaves.address,leaves.parent_phone,leaves.student_phone
                 FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE Student.warden_id = '{user_id}' AND leaves.fa_status = 'Approved' 
                 AND leaves.warden_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
             elif role == "Admin":
-                query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time
+                query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time,leaves.address,leaves.parent_phone,leaves.student_phone
                 FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE leaves.warden_status = 'Approved' AND leaves.admin_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
             elif role == "academics2":
-                query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time
+                query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time,leaves.address,leaves.parent_phone,leaves.student_phone
                 FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE leaves.admin_status = 'Approved' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
@@ -269,6 +272,9 @@ def create_leave():
         OutTime=request.form.get('out_time')
         InTime=request.form.get('in_time')
         rollno=session['user_id']
+        student_phone = request.form.get('student_phone')
+        parent_phone = request.form.get('parent_phone')
+        address = request.form.get('address')
         leave_data={
             "leave_id" : leave_id_str,
             "rollno" : rollno,
@@ -276,7 +282,11 @@ def create_leave():
             "Sdate" : Sdate,
             "OutTime" : OutTime,
             "Edate" : Edate,
-            "InTime" : InTime
+            "InTime" : InTime,
+            "student_phone" : student_phone,
+            "parent_phone" : parent_phone,
+            "address" : address
+
         }
         for key,value in leave_data.items():
             if not value or str(value).strip()=="":
@@ -412,4 +422,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',debug=True)
+    app.run(host='0.0.0.0',debug=True,port=5000)

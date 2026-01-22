@@ -82,9 +82,17 @@
                         <th scope="col"
                             class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                             Reason</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Address</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Student Phone</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Parent Phone</th>
                         <th scope="col"
                             class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                             Dates</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Time</th>
                         <th scope="col"
                             class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                             Remarks</th>
@@ -100,8 +108,13 @@
                         <td data-label="Roll No" class="px-6 py-4 text-sm text-gray-900">{{ leave.rollno }}</td>
                         <td data-label="Name" class="px-6 py-4 text-sm text-gray-900">{{ leave.name }}</td>
                         <td data-label="Reason" class="px-6 py-4 text-sm text-gray-900">{{ leave.reason }}</td>
+                        <td data-label="Address" class="px-6 py-4 text-sm text-gray-900">{{ leave.address }}</td>
+                        <td data-label="Student Phone" class="px-6 py-4 text-sm text-gray-900">{{ leave.student_phone }}</td>
+                        <td data-label="Parent Phone" class="px-6 py-4 text-sm text-gray-900">{{ leave.parent_phone }}</td>
                         <td data-label="Dates" class="px-6 py-4 text-sm text-gray-900">{{ leave.start_date }} to {{
                             leave.end_date }}</td>
+                        <td data-label="Time" class="px-6 py-4 text-sm text-gray-900">{{ leave.out_time }} to {{
+                            leave.in_time }}</td>
 
                         <form action="{{ url_for('fa_pending_leaves') }}" method="post">
                             <input type="hidden" name="leave_id" value="{{ leave.leave_id }}">

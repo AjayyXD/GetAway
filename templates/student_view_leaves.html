@@ -264,6 +264,7 @@
                             <th>ID</th>
                             <th>Reason</th>
                             <th>Dates</th>
+                            <th>Time</th>
                             <th>FA Status</th>
                             <th>Warden Status</th>
                             <th>Admin Status</th>
@@ -275,6 +276,7 @@
                             <td class="leave-id">#{{ leave.leave_id }}</td>
                             <td>{{ leave.reason }}</td>
                             <td>{{ leave.start_date }} - {{ leave.end_date }}</td>
+                            <td>{{ leave.out_time }} - {{ leave.in_time }}</td>
                             <td><span class="status-badge status-{{ leave.fa_status|lower }}">{{ leave.fa_status
                                     }}</span></td>
                             <td><span class="status-badge status-{{ leave.warden_status|lower }}">{{ leave.warden_status
@@ -301,6 +303,10 @@
                     <div class="leave-card-row">
                         <span class="leave-card-label">Dates</span>
                         <span class="leave-card-value">{{ leave.start_date }} to {{ leave.end_date }}</span>
+                    </div>
+                    <div class="leave-card-row">
+                        <span class="leave-card-label">Time</span>
+                        <span class="leave-card-value">{{ leave.out_time }} to {{ leave.in_time }}</span>
                     </div>
                     <div class="leave-card-row">
                         <span class="leave-card-label">FA Status</span>

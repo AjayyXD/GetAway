@@ -292,6 +292,9 @@ def create_leave():
             if not value or str(value).strip()=="":
                 flash(f"Error {key} cannot be empty")
                 return redirect(url_for('create_leave'))
+        if Edate<=Sdate:
+            flash(f"Error End date must be after Start date")
+            return redirect(url_for('create_leave'))
         
         db = Database()
         if(db.insert_leave_request(leave_data)):

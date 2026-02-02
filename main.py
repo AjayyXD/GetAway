@@ -39,7 +39,11 @@ class Database:
         else :
             id_select = "id"
         try:
-            query = f"SELECT name,password_hash FROM {role} WHERE {id_select} = %s"
+            query = ""
+            if role == 'Student':
+                query = f"SELECT name,password_hash,suspended FROM {role} WHERE {id_select} = %s"
+            else :
+                query = f"SELECT name,password_hash FROM {role} WHERE {id_select} = %s"
             cursor.execute(query, (user_id,))
             result = cursor.fetchone()
             return result 
@@ -60,23 +64,44 @@ class Database:
 
         cursor = connection.cursor()
         try:
-            query = """
-            INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status, address, parent_phone,student_phone)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            values = (
-                leave_data['leave_id'],
-                leave_data['rollno'],
-                leave_data['reason'],
-                leave_data['Sdate'],
-                leave_data['OutTime'],
-                leave_data['Edate'],
-                leave_data['InTime'],
-                "Pending",
-                leave_data['address'],
-                leave_data['parent_phone'],
-                leave_data['student_phone']
-            )
+            if session['suspended'] == 0:
+                query = """
+                INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status, address, parent_phone,student_phone)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                values = (
+                    leave_data['leave_id'],
+                    leave_data['rollno'],
+                    leave_data['reason'],
+                    leave_data['Sdate'],
+                    leave_data['OutTime'],
+                    leave_data['Edate'],
+                    leave_data['InTime'],
+                    "Pending",
+                    leave_data['address'],
+                    leave_data['parent_phone'],
+                    leave_data['student_phone']
+                )
+            else : 
+                query = """
+                INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status,warden_status, address, parent_phone,student_phone)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                values = (
+                    leave_data['leave_id'],
+                    leave_data['rollno'],
+                    leave_data['reason'],
+                    leave_data['Sdate'],
+                    leave_data['OutTime'],
+                    leave_data['Edate'],
+                    leave_data['InTime'],
+                    "Pending",
+                    "Approved",
+                    leave_data['address'],
+                    leave_data['parent_phone'],
+                    leave_data['student_phone']
+                )
+
             cursor.execute(query, values)
             updated_id = cursor.lastrowid
             current_year = datetime.datetime.now().strftime('%y')
@@ -114,7 +139,7 @@ class Database:
             elif role == "Warden":
                 query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time,leaves.address,leaves.parent_phone,leaves.student_phone
                 FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE Student.warden_id = '{user_id}' AND leaves.fa_status = 'Approved' 
-                AND leaves.warden_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
+                AND leaves.warden_status = 'Pending' AND Student.suspended = 0 ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
@@ -234,6 +259,7 @@ def login():
                 session['name'] = user_data.get('name')
                 
                 if role_attempt == 'Student':
+                    session['suspended'] = user_data.get('suspended')
                     return redirect(url_for('student_dashboard'))
                 elif role_attempt == 'FA':
                     return redirect(url_for('fa_dashboard'))

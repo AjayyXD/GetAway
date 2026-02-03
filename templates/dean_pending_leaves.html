@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Leaves</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Added responsive table styles */
+        @media (max-width: 768px) {
+            .responsive-table thead {
+                display: none;
+            }
+
+            .responsive-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                background: white;
+            }
+
+            .responsive-table td {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.5rem 0;
+                border: none;
+            }
+
+            .responsive-table td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #4b5563;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Added dark header -->
+    <header class="bg-gray-900 text-white py-6 px-8">
+        <h1 class="text-2xl font-bold">Pending Leave Requests</h1>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded-lg relative mb-6"
+            role="alert">
+            <strong class="font-bold">{{ category.title() }}:</strong>
+            <span class="block sm:inline">{{ message }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% if leaves %}
+        <!-- Updated table styles to minimal design -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200 responsive-table">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col"
+                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Student Roll No</th>
+                        <th scope="col"
+                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Student Name</th>
+                        <th scope="col"
+                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Reason</th>
+                        <th scope="col"
+                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Dates</th>
+                        <th scope="col"
+                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Time</th>
+                        <th scope="col"
+                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">FA
+                            Remark</th>
+                        <th scope="col"
+                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Action</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for leave in leaves %}
+                    <tr class="hover:bg-gray-50">
+                        <td data-label="ID" class="px-6 py-4 text-sm text-gray-900">{{ leave.leave_id }}</td>
+                        <td data-label="Roll No" class="px-6 py-4 text-sm text-gray-900">{{ leave.rollno }}</td>
+                        <td data-label="Name" class="px-6 py-4 text-sm text-gray-900">{{ leave.name }}</td>
+                        <td data-label="Reason" class="px-6 py-4 text-sm text-gray-900">{{ leave.reason }}</td>
+                        <td data-label="Address" class="px-6 py-4 text-sm text-gray-900">{{ leave.address }}</td>
+                        <td data-label="Student Phone" class="px-6 py-4 text-sm text-gray-900">{{ leave.student_phone }}
+                        </td>
+                        <td data-label="Parent Phone" class="px-6 py-4 text-sm text-gray-900">{{ leave.parent_phone }}
+                        </td>
+                        <td data-label="Dates" class="px-6 py-4 text-sm text-gray-900">{{ leave.start_date }} to {{
+                            leave.end_date }}</td>
+                        <td data-label="Time" class="px-6 py-4 text-sm text-gray-900">{{ leave.out_time }} to {{
+                            leave.in_time }}</td>
+                        <td data-label="FA Remark" class="px-6 py-4 text-sm text-gray-900">{{ leave.FA_Remarks }}</td>
+                        <td data-label="Action" class="px-6 py-4 text-sm font-medium">
+                            <form action="{{ url_for('dean_pending_leaves') }}" method="post">
+                                <input type="hidden" name="leave_id" value="{{ leave.leave_id }}">
+                                <button type="submit"
+                                    class="text-gray-900 hover:text-gray-700 font-medium border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-50 transition">Approve</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+            <p class="text-gray-500">No pending leave requests to review.</p>
+        </div>
+        {% endif %}
+
+        <div class="mt-8 text-center">
+            <a href="{{ url_for('dean_dashboard') }}" class="text-gray-900 hover:text-gray-700 font-medium">← Back
+                to Dashboard</a>
+        </div>
+    </div>
+</body>
+
+</html>

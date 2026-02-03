@@ -42,6 +42,8 @@ class Database:
             query = ""
             if role == 'Student':
                 query = f"SELECT name,password_hash,suspended FROM {role} WHERE {id_select} = %s"
+            elif role == 'Admin':
+                query = f"SELECT name,password_hash,role FROM {role} WHERE {id_select} = %s"
             else :
                 query = f"SELECT name,password_hash FROM {role} WHERE {id_select} = %s"
             cursor.execute(query, (user_id,))
@@ -266,7 +268,10 @@ def login():
                 elif role_attempt == 'Warden' :
                     return redirect(url_for('warden_dashboard'))
                 elif role_attempt == 'Admin' :
-                    return redirect(url_for('academics_dashboard'))
+                    if user_data.get('role') == "Dean":
+                        return redirect(url_for('dean_dashboard'))
+                    else:
+                        return redirect(url_for('academics_dashboard'))
                 
         flash('Invalid credentials or role. Please try again.')
         return render_template('login_form.html', error_message="Invalid credentials or role. Please try again.")
@@ -400,6 +405,34 @@ def warden_pending_leaves():
     except Exception as e:
         flash(f"An error occurred: {e}", 'error')
         return redirect(url_for('warden_dashboard'))
+
+@app.route('/dean_dashboard')
+def dean_dashboard():
+    if 'user_id' not in session or session['role'] != 'Admin':
+        flash('Unauthorized access.','error')
+        return redirect(url_for('login'))
+    return render_template('dean_dashboard.html',name = session['name'])
+
+@app.route('/dean_pending_leaves', methods=['GET', 'POST'])
+def dean_pending_leaves():
+    if 'user_id' not in session or session['role'] != 'Admin':
+        flash('Unauthorized access.', 'error')
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        leave_id = request.form.get('leave_id')
+        if db.dean_approve_leave(leave_id):
+            flash(f"Leave {leave_id} approved successfully.", 'success')
+        else:
+            flash(f"Failed to approve leave {leave_id}.", 'error')
+        return redirect(url_for('dean_pending_leaves'))
+    
+    try:
+        leaves = db.view_leaves('Admin', session['user_id'])
+        return render_template('dean_pending_leaves.html', leaves=leaves)
+    except Exception as e:
+        flash(f"An error occurred: {e}", 'error')
+        return redirect(url_for('dean_dashboard'))
 
 @app.route('/academics_dashboard')
 def academics_dashboard():

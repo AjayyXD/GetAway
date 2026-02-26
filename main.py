@@ -67,42 +67,93 @@ class Database:
         cursor = connection.cursor()
         try:
             if session['suspended'] == 0:
-                query = """
-                INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status, address, parent_phone,student_phone)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """
-                values = (
-                    leave_data['leave_id'],
-                    leave_data['rollno'],
-                    leave_data['reason'],
-                    leave_data['Sdate'],
-                    leave_data['OutTime'],
-                    leave_data['Edate'],
-                    leave_data['InTime'],
-                    "Pending",
-                    leave_data['address'],
-                    leave_data['parent_phone'],
-                    leave_data['student_phone']
-                )
+                if leave_data['working_days'] < 3:
+                    query = """
+                    INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status, address, parent_phone,student_phone,total_days,working_days)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    values = (
+                        leave_data['leave_id'],
+                        leave_data['rollno'],
+                        leave_data['reason'],
+                        leave_data['Sdate'],
+                        leave_data['OutTime'],
+                        leave_data['Edate'],
+                        leave_data['InTime'],
+                        "Pending",
+                        leave_data['address'],
+                        leave_data['parent_phone'],
+                        leave_data['student_phone'],
+                        leave_data['total_days'],
+                        leave_data['working_days']
+                    )
+                else:
+                    query = """
+                    INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status, address, parent_phone,student_phone,total_days,working_days,dean_status)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    values = (
+                        leave_data['leave_id'],
+                        leave_data['rollno'],
+                        leave_data['reason'],
+                        leave_data['Sdate'],
+                        leave_data['OutTime'],
+                        leave_data['Edate'],
+                        leave_data['InTime'],
+                        "Pending",
+                        leave_data['address'],
+                        leave_data['parent_phone'],
+                        leave_data['student_phone'],
+                        leave_data['total_days'],
+                        leave_data['working_days'],
+                        "Pending"
+                    )
+                    
             else : 
-                query = """
-                INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status,warden_status, address, parent_phone,student_phone)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """
-                values = (
-                    leave_data['leave_id'],
-                    leave_data['rollno'],
-                    leave_data['reason'],
-                    leave_data['Sdate'],
-                    leave_data['OutTime'],
-                    leave_data['Edate'],
-                    leave_data['InTime'],
-                    "Pending",
-                    "Approved",
-                    leave_data['address'],
-                    leave_data['parent_phone'],
-                    leave_data['student_phone']
-                )
+                if leave_data['working_days'] < 3:
+                    query = """
+                    INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status,warden_status, address, parent_phone,student_phone,total_days,working_days)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    values = (
+                        leave_data['leave_id'],
+                        leave_data['rollno'],
+                        leave_data['reason'],
+                        leave_data['Sdate'],
+                        leave_data['OutTime'],
+                        leave_data['Edate'],
+                        leave_data['InTime'],
+                        "Pending",
+                        "Approved",
+                        leave_data['address'],
+                        leave_data['parent_phone'],
+                        leave_data['student_phone'],
+                        leave_data['total_days'],
+                        leave_data['working_days']
+                    )
+                else:
+                    query = """
+                    INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status,warden_status, address, parent_phone,student_phone,total_days,working_days,dean_status)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    values = (
+                        leave_data['leave_id'],
+                        leave_data['rollno'],
+                        leave_data['reason'],
+                        leave_data['Sdate'],
+                        leave_data['OutTime'],
+                        leave_data['Edate'],
+                        leave_data['InTime'],
+                        "Pending",
+                        "Approved",
+                        leave_data['address'],
+                        leave_data['parent_phone'],
+                        leave_data['student_phone'],
+                        leave_data['total_days'],
+                        leave_data['working_days'],
+                        "Pending"
+                    )
+
 
             cursor.execute(query, values)
             updated_id = cursor.lastrowid
@@ -133,8 +184,10 @@ class Database:
                 leaves = cursor.fetchall()
                 return leaves
             elif role == "FA":
-                query = f"""SELECT Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time,leaves.student_phone
-                ,leaves.parent_phone,leaves.address FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE Student.fa_id = '{user_id}' AND leaves.fa_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
+                query = f"""SELECT Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,
+                leaves.end_date,leaves.in_time,leaves.student_phone,leaves.working_days,leaves.total_days
+                ,leaves.parent_phone,leaves.address FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE Student.fa_id = '{user_id}' 
+                AND leaves.fa_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
@@ -147,7 +200,7 @@ class Database:
                 return leaves
             elif role == "Admin":
                 query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time,leaves.address,leaves.parent_phone,leaves.student_phone
-                FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE leaves.warden_status = 'Approved' AND leaves.admin_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
+                FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE leaves.warden_status = 'Approved' AND leaves.admin_status = 'Pending' AND NOT leaves.dean_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
@@ -157,6 +210,14 @@ class Database:
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
+            elif role == "Dean":
+                query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time,leaves.address,
+                leaves.total_days,leaves.working_days,leaves.parent_phone,leaves.student_phone
+                FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE leaves.warden_status = 'Approved' AND leaves.dean_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
+                cursor.execute(query)
+                leaves = cursor.fetchall()
+                return leaves
+
             else:
                 return []
         except Exception as e:
@@ -212,6 +273,24 @@ class Database:
         cursor = connection.cursor(dictionary=True)
         try:
             query = "UPDATE leaves SET admin_status = 'Approved' WHERE leave_id = %s"
+            cursor.execute(query,(id,))
+            connection.commit()
+            return True
+        except Exception as e:
+            print(f"Some error occured: {e}")
+            return None
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
+    def dean_approve_leave(self,id):
+        connection = self.get_connection()
+        if connection is None:
+            return None
+        cursor = connection.cursor(dictionary=True)
+        try:
+            query = "UPDATE leaves SET dean_status = 'Approved' WHERE leave_id = %s"
             cursor.execute(query,(id,))
             connection.commit()
             return True
@@ -306,7 +385,9 @@ def create_leave():
         student_phone = request.form.get('student_phone')
         parent_phone = request.form.get('parent_phone')
         address = request.form.get('address')
-        leave_data={
+        total_days = int(request.form.get('total_days'))
+        working_days = int(request.form.get('working_days'))
+        leave_data = {
             "leave_id" : leave_id_str,
             "rollno" : rollno,
             "reason" : reason,
@@ -316,15 +397,22 @@ def create_leave():
             "InTime" : InTime,
             "student_phone" : student_phone,
             "parent_phone" : parent_phone,
-            "address" : address
+            "address" : address,
+            "total_days" : total_days,
+            "working_days" : working_days
 
         }
         for key,value in leave_data.items():
+            if key == "working_days":
+                continue
             if not value or str(value).strip()=="":
                 flash(f"Error {key} cannot be empty")
                 return redirect(url_for('create_leave'))
         if Edate<=Sdate:
             flash(f"Error End date must be after Start date")
+            return redirect(url_for('create_leave'))
+        if total_days<0 :
+            flash("The total number of days cannot be less than zero")
             return redirect(url_for('create_leave'))
         
         db = Database()
@@ -428,7 +516,7 @@ def dean_pending_leaves():
         return redirect(url_for('dean_pending_leaves'))
     
     try:
-        leaves = db.view_leaves('Admin', session['user_id'])
+        leaves = db.view_leaves('Dean', session['user_id'])
         return render_template('dean_pending_leaves.html', leaves=leaves)
     except Exception as e:
         flash(f"An error occurred: {e}", 'error')

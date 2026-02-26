@@ -13,7 +13,117 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Added responsive table styles */
+        /* Desktop table expanding layout */
+        .table-wrapper {
+            width: 100%;
+            overflow: visible;
+        }
+
+        .responsive-table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: auto;
+        }
+
+        .responsive-table th,
+        .responsive-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .responsive-table th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background-color: #f9fafb;
+            color: #374151;
+        }
+
+        .responsive-table td {
+            font-size: 0.875rem;
+            color: #111827;
+        }
+
+        .responsive-table tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .responsive-table input,
+        .responsive-table button {
+            max-width: 100%;
+            font-size: 0.875rem;
+        }
+
+        .remarks-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .remarks-textarea:focus {
+            outline: none;
+            ring: 2px;
+            ring-color: rgb(17, 24, 39);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-approve,
+        .btn-reject {
+            flex: 1;
+            min-width: 100px;
+            font-weight: 600;
+            border: 2px solid;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .btn-approve {
+            border-color: #10b981;
+            color: #10b981;
+            background-color: white;
+        }
+
+        .btn-approve:hover,
+        .btn-approve:active {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-reject {
+            border-color: #ef4444;
+            color: #ef4444;
+            background-color: white;
+        }
+
+        .btn-reject:hover,
+        .btn-reject:active {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .btn-approve,
+            .btn-reject {
+                width: 100%;
+            }
+        }
+
+        /* Mobile responsive table styles */
         @media (max-width: 768px) {
             .responsive-table thead {
                 display: none;
@@ -33,6 +143,7 @@
                 flex-direction: column;
                 padding: 0.5rem 0;
                 border: none;
+                min-width: auto;
             }
 
             .responsive-table td:before {
@@ -40,6 +151,15 @@
                 font-weight: 600;
                 color: #4b5563;
                 margin-bottom: 0.25rem;
+            }
+
+            .table-wrapper {
+                overflow-x: visible;
+            }
+
+            .responsive-table input,
+            .responsive-table button {
+                width: 100%;
             }
         }
     </style>
@@ -66,76 +186,97 @@
 
         {% if leaves %}
         <!-- Updated table styles to minimal design with remarks input -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200 responsive-table">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col"
-                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Student Roll No</th>
-                        <th scope="col"
-                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Student Name</th>
-                        <th scope="col"
-                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Reason</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Address</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Student Phone</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Parent Phone</th>
-                        <th scope="col"
-                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Dates</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Time</th>
-                        <th scope="col"
-                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Remarks</th>
-                        <th scope="col"
-                            class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Action</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for leave in leaves %}
-                    <tr class="hover:bg-gray-50">
-                        <td data-label="ID" class="px-6 py-4 text-sm text-gray-900">{{ leave.leave_id }}</td>
-                        <td data-label="Roll No" class="px-6 py-4 text-sm text-gray-900">{{ leave.rollno }}</td>
-                        <td data-label="Name" class="px-6 py-4 text-sm text-gray-900">{{ leave.name }}</td>
-                        <td data-label="Reason" class="px-6 py-4 text-sm text-gray-900">{{ leave.reason }}</td>
-                        <td data-label="Address" class="px-6 py-4 text-sm text-gray-900">{{ leave.address }}</td>
-                        <td data-label="Student Phone" class="px-6 py-4 text-sm text-gray-900">{{ leave.student_phone }}</td>
-                        <td data-label="Parent Phone" class="px-6 py-4 text-sm text-gray-900">{{ leave.parent_phone }}</td>
-                        <td data-label="Dates" class="px-6 py-4 text-sm text-gray-900">{{ leave.start_date }} to {{
-                            leave.end_date }}</td>
-                        <td data-label="Time" class="px-6 py-4 text-sm text-gray-900">{{ leave.out_time }} to {{
-                            leave.in_time }}</td>
-
-                        <form action="{{ url_for('fa_pending_leaves') }}" method="post">
-                            <input type="hidden" name="leave_id" value="{{ leave.leave_id }}">
-                            <input type="hidden" name="action_type" value="Approve">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 w-full">
+            <div class="table-wrapper">
+                <table class="min-w-full divide-y divide-gray-200 responsive-table">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                ID
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Student Roll No</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Student Name</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Reason</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Address</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Student Phone</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Parent Phone</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Dates</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Time</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Total Days</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Working Days</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Remarks</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for leave in leaves %}
+                        <tr class="hover:bg-gray-50">
+                            <td data-label="ID" class="px-6 py-4 text-sm text-gray-900">{{ leave.leave_id }}</td>
+                            <td data-label="Roll No" class="px-6 py-4 text-sm text-gray-900">{{ leave.rollno }}</td>
+                            <td data-label="Name" class="px-6 py-4 text-sm text-gray-900">{{ leave.name }}</td>
+                            <td data-label="Reason" class="px-6 py-4 text-sm text-gray-900">{{ leave.reason }}</td>
+                            <td data-label="Address" class="px-6 py-4 text-sm text-gray-900">{{ leave.address }}</td>
+                            <td data-label="Student Phone" class="px-6 py-4 text-sm text-gray-900">{{
+                                leave.student_phone }}</td>
+                            <td data-label="Parent Phone" class="px-6 py-4 text-sm text-gray-900">{{ leave.parent_phone
+                                }}</td>
+                            <td data-label="Dates" class="px-6 py-4 text-sm text-gray-900">{{ leave.start_date }} to {{
+                                leave.end_date }}</td>
+                            <td data-label="Time" class="px-6 py-4 text-sm text-gray-900">{{ leave.out_time }} to {{
+                                leave.in_time }}</td>
+                            <td data-label="Total days" class="px-6 py-4 text-sm text-gray-900">{{ leave.total_days
+                                }}</td>
+                            <td data-label="Working days" class="px-6 py-4 text-sm text-gray-900">{{ leave.working_days
+                                }}</td>
 
                             <td data-label="Remarks" class="px-6 py-4">
-                                <input type="text" name="remarks" placeholder="Optional remarks"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                                <textarea name="remarks" placeholder="Optional remarks"
+                                    class="remarks-textarea w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900"></textarea>
                             </td>
 
                             <td data-label="Action" class="px-6 py-4 text-sm font-medium">
-                                <button type="submit"
-                                    class="text-gray-900 hover:text-gray-700 font-medium border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-50 transition">
-                                    Approve
-                                </button>
+                                <div class="action-buttons">
+                                    <form action="{{ url_for('fa_pending_leaves') }}" method="post" style="flex: 1;">
+                                        <input type="hidden" name="leave_id" value="{{ leave.leave_id }}">
+                                        <input type="hidden" name="action_type" value="Approve">
+                                        <input type="hidden" name="remarks" value="">
+                                        <button type="submit" class="btn-approve w-full">Approve</button>
+                                    </form>
+                                    <form action="{{ url_for('fa_pending_leaves') }}" method="post" style="flex: 1;">
+                                        <input type="hidden" name="leave_id" value="{{ leave.leave_id }}">
+                                        <input type="hidden" name="action_type" value="Reject">
+                                        <input type="hidden" name="remarks" value="">
+                                        <button type="submit" class="btn-reject w-full">Reject</button>
+                                    </form>
+                                </div>
                             </td>
-                        </form>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
         {% else %}
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
@@ -148,6 +289,35 @@
                 Dashboard</a>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const remarkTextareas = document.querySelectorAll('.remarks-textarea');
+
+            remarkTextareas.forEach(textarea => {
+                const row = textarea.closest('tr');
+                const forms = row.querySelectorAll('form');
+
+                forms.forEach(form => {
+                    form.querySelector('input[name="remarks"]').value = textarea.value;
+
+                    form.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        this.querySelector('input[name="remarks"]').value = textarea.value;
+                        this.submit();
+                    });
+                });
+
+                textarea.addEventListener('change', function () {
+                    const row = this.closest('tr');
+                    const forms = row.querySelectorAll('form');
+                    forms.forEach(form => {
+                        form.querySelector('input[name="remarks"]').value = this.value;
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

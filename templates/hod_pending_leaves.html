@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Leaves</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Desktop table expanding layout */
+        .table-wrapper {
+            width: 100%;
+            overflow: visible;
+        }
+
+        .responsive-table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: auto;
+        }
+
+        .responsive-table th,
+        .responsive-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .responsive-table th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background-color: #f9fafb;
+            color: #374151;
+        }
+
+        .responsive-table td {
+            font-size: 0.875rem;
+            color: #111827;
+        }
+
+        .responsive-table tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-approve,
+        .btn-reject {
+            flex: 1;
+            min-width: 100px;
+            font-weight: 600;
+            border: 2px solid;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .btn-approve {
+            border-color: #10b981;
+            color: #10b981;
+            background-color: white;
+        }
+
+        .btn-approve:hover,
+        .btn-approve:active {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-reject {
+            border-color: #ef4444;
+            color: #ef4444;
+            background-color: white;
+        }
+
+        .btn-reject:hover,
+        .btn-reject:active {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        /* Mobile responsive table styles */
+        @media (max-width: 768px) {
+            .responsive-table thead {
+                display: none;
+            }
+
+            .responsive-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                background: white;
+            }
+
+            .responsive-table td {
+                display: flex;
+                flex-direction: column;
+                padding: 0.5rem 0;
+                border: none;
+                min-width: auto;
+            }
+
+            .responsive-table td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #4b5563;
+                margin-bottom: 0.25rem;
+            }
+
+            .table-wrapper {
+                overflow-x: visible;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .btn-approve,
+            .btn-reject {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Added dark header -->
+    <header class="bg-gray-900 text-white py-6 px-8">
+        <h1 class="text-2xl font-bold">Pending Leave Requests</h1>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded-lg relative mb-6"
+            role="alert">
+            <strong class="font-bold">{{ category.title() }}:</strong>
+            <span class="block sm:inline">{{ message }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% if leaves %}
+        <!-- Updated table styles to minimal design -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 w-full">
+            <div class="table-wrapper">
+                <table class="responsive-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Student Roll No</th>
+                            <th scope="col">Student Name</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Address</th>
+                            <th scope="col">Student Phone</th>
+                            <th scope="col">Parent Phone</th>
+                            <th scope="col">Dates</th>
+                            <th scope="col">Time</th>
+                            <th scope="col">Total days</th>
+                            <th scope="col">Working days</th>
+                            <th scope="col">FA Remark</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in leaves %}
+                        <tr>
+                            <td data-label="ID">{{ leave.leave_id }}</td>
+                            <td data-label="Roll No">{{ leave.rollno }}</td>
+                            <td data-label="Name">{{ leave.name }}</td>
+                            <td data-label="Reason">{{ leave.reason }}</td>
+                            <td data-label="Address">{{ leave.address }}</td>
+                            <td data-label="Student Phone">{{ leave.student_phone }}</td>
+                            <td data-label="Parent Phone">{{ leave.parent_phone }}</td>
+                            <td data-label="Dates">{{ leave.start_date }} to {{ leave.end_date }}</td>
+                            <td data-label="Time">{{ leave.out_time }} to {{ leave.in_time }}</td>
+                            <td data-label="Total days">{{ leave.total_days }}</td>
+                            <td data-label="Working days">{{ leave.working_days }}</td>
+                            <td data-label="FA Remark">{{ leave.FA_Remarks }}</td>
+
+                            <td data-label="Action">
+                                <div class="action-buttons">
+                                    <form action="{{ url_for('hod_pending_leaves') }}" method="post" style="flex: 1;">
+                                        <input type="hidden" name="leave_id" value="{{ leave.leave_id }}">
+                                        <input type="hidden" name="action_type" value="Approve">
+                                        <button type="submit" class="btn-approve w-full">Approve</button>
+                                    </form>
+                                    <form action="{{ url_for('hod_pending_leaves') }}" method="post" style="flex: 1;">
+                                        <input type="hidden" name="leave_id" value="{{ leave.leave_id }}">
+                                        <input type="hidden" name="action_type" value="Reject">
+                                        <button type="submit" class="btn-reject w-full">Reject</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+            <p class="text-gray-500">No pending leave requests to review.</p>
+        </div>
+        {% endif %}
+
+        <div class="mt-8 text-center">
+            <a href="{{ url_for('hod_dashboard') }}" class="text-gray-900 hover:text-gray-700 font-medium">← Back to
+                Dashboard</a>
+        </div>
+    </div>
+
+
+</body>
+
+</html>

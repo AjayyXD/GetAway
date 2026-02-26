@@ -89,8 +89,8 @@ class Database:
                     )
                 else:
                     query = """
-                    INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status, address, parent_phone,student_phone,total_days,working_days,dean_status)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status, address, parent_phone,student_phone,total_days,working_days,dean_status,hod_status)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """
                     values = (
                         leave_data['leave_id'],
@@ -106,6 +106,7 @@ class Database:
                         leave_data['student_phone'],
                         leave_data['total_days'],
                         leave_data['working_days'],
+                        "Pending",
                         "Pending"
                     )
                     
@@ -133,8 +134,8 @@ class Database:
                     )
                 else:
                     query = """
-                    INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status,warden_status, address, parent_phone,student_phone,total_days,working_days,dean_status)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    INSERT INTO leaves (leave_id, rollno, reason, start_date, out_time, end_date, in_time, fa_status,warden_status, address, parent_phone,student_phone,total_days,working_days,dean_status,hod_status)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """
                     values = (
                         leave_data['leave_id'],
@@ -151,6 +152,7 @@ class Database:
                         leave_data['student_phone'],
                         leave_data['total_days'],
                         leave_data['working_days'],
+                        "Pending",
                         "Pending"
                     )
 
@@ -200,7 +202,7 @@ class Database:
                 return leaves
             elif role == "Admin":
                 query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time,leaves.address,leaves.parent_phone,leaves.student_phone
-                FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE leaves.warden_status = 'Approved' AND leaves.admin_status = 'Pending' AND NOT leaves.dean_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
+                FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE leaves.warden_status = 'Approved' AND leaves.admin_status = 'Pending' AND NOT leaves.dean_status = 'Pending' AND NOT leaves.hod_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
@@ -214,6 +216,13 @@ class Database:
                 query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time,leaves.address,
                 leaves.total_days,leaves.working_days,leaves.parent_phone,leaves.student_phone
                 FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE leaves.warden_status = 'Approved' AND leaves.dean_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
+                cursor.execute(query)
+                leaves = cursor.fetchall()
+                return leaves
+            elif role == "Hod":
+                query = f"""SELECT leaves.FA_Remarks,Student.name,leaves.leave_id,leaves.rollno,leaves.reason,leaves.start_date,leaves.out_time,leaves.end_date,leaves.in_time,leaves.address,
+                leaves.total_days,leaves.working_days,leaves.parent_phone,leaves.student_phone
+                FROM leaves JOIN Student ON leaves.rollno = Student.student_id WHERE leaves.warden_status = 'Approved' AND leaves.hod_status = 'Pending' ORDER BY leaves.leave_id DESC;"""
                 cursor.execute(query)
                 leaves = cursor.fetchall()
                 return leaves
@@ -302,6 +311,24 @@ class Database:
                 cursor.close()
             if connection:
                 connection.close()
+    def hod_approve_leave(self,id):
+        connection = self.get_connection()
+        if connection is None:
+            return None
+        cursor = connection.cursor(dictionary=True)
+        try:
+            query = "UPDATE leaves SET hod_status = 'Approved' WHERE leave_id = %s"
+            cursor.execute(query,(id,))
+            connection.commit()
+            return True
+        except Exception as e:
+            print(f"Some error occured: {e}")
+            return None
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
     
 
    
@@ -349,6 +376,8 @@ def login():
                 elif role_attempt == 'Admin' :
                     if user_data.get('role') == "Dean":
                         return redirect(url_for('dean_dashboard'))
+                    elif user_data.get('role') == "Hod":
+                        return redirect(url_for('hod_dashboard'))
                     else:
                         return redirect(url_for('academics_dashboard'))
                 
@@ -521,6 +550,34 @@ def dean_pending_leaves():
     except Exception as e:
         flash(f"An error occurred: {e}", 'error')
         return redirect(url_for('dean_dashboard'))
+    
+@app.route('/hod_dashboard')
+def hod_dashboard():
+    if 'user_id' not in session or session['role'] != 'Admin':
+        flash('Unauthorized access.','error')
+        return redirect(url_for('login'))
+    return render_template('hod_dashboard.html',name = session['name'])
+
+@app.route('/hod_pending_leaves', methods=['GET', 'POST'])
+def hod_pending_leaves():
+    if 'user_id' not in session or session['role'] != 'Admin':
+        flash('Unauthorized access.', 'error')
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        leave_id = request.form.get('leave_id')
+        if db.hod_approve_leave(leave_id):
+            flash(f"Leave {leave_id} approved successfully.", 'success')
+        else:
+            flash(f"Failed to approve leave {leave_id}.", 'error')
+        return redirect(url_for('hod_pending_leaves'))
+    
+    try:
+        leaves = db.view_leaves('Hod', session['user_id'])
+        return render_template('hod_pending_leaves.html', leaves=leaves)
+    except Exception as e:
+        flash(f"An error occurred: {e}", 'error')
+        return redirect(url_for('hod_dashboard'))
 
 @app.route('/academics_dashboard')
 def academics_dashboard():
